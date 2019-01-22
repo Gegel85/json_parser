@@ -1,17 +1,17 @@
 NAME =	libjson_parser.a
 
 FILE =	parser.c	\
-	floats.c	\
-	ints.c		\
-	bools.c		\
-	strings.c	\
-	dicts.c		\
-	data.c		\
-	arrays.c	\
-	lists.c		\
-	dumper.c	\
-	debug.c		\
-	concat.c	\
+		floats.c	\
+		ints.c		\
+		bools.c		\
+		strings.c	\
+		dicts.c		\
+		data.c		\
+		arrays.c	\
+		lists.c		\
+		dumper.c	\
+		debug.c		\
+		concat.c	\
         concatf.c	\
         float_to_str.c	\
         get_nbrlen.c	\
@@ -39,15 +39,18 @@ CFLAGS=	$(INC)	\
 CC =	gcc
 
 all:	$(NAME)
+	$(MAKE) -C examples
 
 $(NAME):$(OBJ)
 	$(AR) rc $(NAME) $(OBJ)
 
 clean:
 	$(RM) $(OBJ)
+	$(MAKE) -C clean
 
 fclean:	clean
 	$(RM) $(NAME)
+	$(MAKE) -C examples fclean
 
 re:	fclean all
 

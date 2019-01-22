@@ -1,5 +1,6 @@
 #include <malloc.h>
 #include <string.h>
+#include "concatf.h"
 #include "JsonParser.h"
 
 JsonParserList	*JsonParserList_getElement(JsonParserList *list, int index)
@@ -7,6 +8,8 @@ JsonParserList	*JsonParserList_getElement(JsonParserList *list, int index)
 	int		len = 0;
 
 	for (JsonParserList *buf = list; buf; buf = buf->next, len++);
+	if (ABS(index) >= len)
+		return NULL;
 	index = (index % len + len) % len;
 	for (int i = 0; i++ < index; list = list->next);
 	return (list);

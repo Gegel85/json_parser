@@ -210,6 +210,7 @@ JsonParserResult	getValue(char *str, JsonParserInfos *infos)
 	JsonParserList	*list;
 	int		arrlvl = 0;
 	int		objlvl = 0;
+	int		string = -1;
 
 	memset(&result, 0, sizeof(result));
 	if (!*str) {
@@ -269,8 +270,13 @@ JsonParserResult	getValue(char *str, JsonParserInfos *infos)
 			}
 			obj->data = buff.data;
 			obj->type = buff.type;
-			for (; str[index] && ((str[index] != infos->objClose && str[index] != infos->separator) || arrlvl > 0 || objlvl > 0); index++) {
-				if (str[index] == infos->objOpen)
+			for (; str[index] && ((str[index] != infos->objClose && str[index] != infos->separator) || arrlvl > 0 || objlvl > 0 || string >= 0); index++) {
+				if (isInString(str[index], infos->strChar) >= 0 || string >= 0) {
+					if (string == -1)
+						string = isInString(str[index], infos->strChar);
+					else if (isInString(str[index], infos->strChar) == string)
+						string = -1;
+				} else if (str[index] == infos->objOpen)
 					objlvl++;
 				else if (str[index] == infos->arrOpen)
 					arrlvl++;
@@ -318,8 +324,13 @@ JsonParserResult	getValue(char *str, JsonParserInfos *infos)
 			}
 			list->data = buff.data;
 			list->type = buff.type;
-			for (; str[index] && ((str[index] != infos->arrClose && str[index] != infos->separator) || arrlvl > 0 || objlvl > 0); index++) {
-				if (str[index] == infos->objOpen)
+			for (; str[index] && ((str[index] != infos->arrClose && str[index] != infos->separator) || arrlvl > 0 || objlvl > 0 || string >= 0); index++) {
+				if (isInString(str[index], infos->strChar) >= 0 || string >= 0) {
+					if (string == -1)
+						string = isInString(str[index], infos->strChar);
+					else if (isInString(str[index], infos->strChar) == string)
+						string = -1;
+				} else if (str[index] == infos->objOpen)
 					objlvl++;
 				else if (str[index] == infos->arrOpen)
 					arrlvl++;
