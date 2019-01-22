@@ -5,7 +5,8 @@ set(CMAKE_C_STANDARD 11)
 
 include_directories(include)
 
-add_library(json_parser
+add_library(
+	json_parser
 	include/concatf.h
 	include/flags.h
 	include/JsonParser.h
@@ -32,4 +33,21 @@ add_library(json_parser
 	sources/my_putnbr_base.c
 	sources/my_putstar.c
 	sources/my_putbase.c
-	sources/power.c)
+	sources/power.c
+	examples/json_parser.c
+)
+
+add_executable(
+	json_parse
+	examples/json_parser.c
+)
+
+add_executable(
+	json_nice
+	examples/json_nice.c
+	examples/json_nice.c examples/json_creator.c)
+
+add_executable(
+	json_creator
+	examples/json_creator.c
+)
