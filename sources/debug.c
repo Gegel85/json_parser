@@ -1,10 +1,10 @@
-#include "configParser.h"
 #include <malloc.h>
 #include <stdio.h>
+#include "JsonParser.h"
 
-void	Parser_printElement(void *data, ParserTypes type, ParserInfos *infos)
+void	JsonParser_printElement(void *data, JsonParserTypes type, JsonParserInfos *infos)
 {
-	char	*result = Parser_createString(data, type, infos ? infos : JSON_NOT_COMPACT);
+	char	*result = JsonParser_createString(data, type, infos ? infos : JSON_NOT_COMPACT);
 	
 	printf("%s\n", result);
 	free(result);

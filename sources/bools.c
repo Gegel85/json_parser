@@ -1,12 +1,12 @@
-#include "configParser.h"
 #include <malloc.h>
+#include "JsonParser.h"
 
-bool	ParserBoolean_toBool(ParserBoolean *value)
+bool	JsonParserBoolean_toBool(JsonParserBoolean *value)
 {
 	return (*value);
 }
 
-void	ParserBoolean_destroy(ParserBoolean *value)
+void	JsonParserBoolean_destroy(JsonParserBoolean *value)
 {
 	free(value);
 }

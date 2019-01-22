@@ -1,13 +1,13 @@
-#include "configParser.h"
 #include <malloc.h>
 #include <concatf.h>
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include "JsonParser.h"
 
 int	isInString(char c, char *str);
 
-char	*transformString(char *str, int length, ParserInfos *infos)
+char	*transformString(char *str, int length, JsonParserInfos *infos)
 {
 	char	*result = strdup("");
 	char	*buffer = NULL;
@@ -43,7 +43,7 @@ char	*transformString(char *str, int length, ParserInfos *infos)
 	return (result);
 }
 
-char	*dataToString(void *data, ParserTypes type, ParserInfos *infos, int indentation)
+char	*dataToString(void *data, JsonParserTypes type, JsonParserInfos *infos, int indentation)
 {
 	char	*indent = strdup("");
 	char	*index = NULL;
@@ -53,24 +53,24 @@ char	*dataToString(void *data, ParserTypes type, ParserInfos *infos, int indenta
 	for (int i = 0; i < indentation; i++)
 		indent = concat(indent, "\t", true, false);
 	switch(type) {
-	case ParserBooleanType:
-		result = strdup(*(ParserBoolean *)data ? "true" : "false");
+	case JsonParserBooleanType:
+		result = strdup(*(JsonParserBoolean *)data ? "true" : "false");
 		break;
-	case ParserStringType:
-		buffer = transformString(((ParserString *)data)->content, ((ParserString *)data)->length, infos);
+	case JsonParserStringType:
+		buffer = transformString(((JsonParserString *)data)->content, ((JsonParserString *)data)->length, infos);
 		result = concatf("%c%s%c", infos->strChar[0], buffer, infos->strChar[0]);
 		free(buffer);
 		break;
-	case ParserFloatType:
-		result = concatf("%f", *(ParserFloat *)data);
+	case JsonParserFloatType:
+		result = concatf("%f", *(JsonParserFloat *)data);
 		break;
-	case ParserArrayType:
+	case JsonParserArrayType:
 		result = malloc(2);
 		if (!result)
 			return (NULL);
 		result[0] = infos->arrOpen;
 		result[1] = 0;
-		for (int i = 0; i < ((ParserArray *)data)->length; i++) {
+		for (int i = 0; i < ((JsonParserArray *)data)->length; i++) {
 			if (!infos->compact) {
 				buffer = result;
 				result = concatf("%s\n%s\t", result, indent);
@@ -78,7 +78,7 @@ char	*dataToString(void *data, ParserTypes type, ParserInfos *infos, int indenta
 					return (NULL);
 				free(buffer);
 			}
-			result = concat(result, dataToString(ParserArray_getElement(data, i), ((ParserArray *)data)->type, infos, indentation + 1), true, true);
+			result = concat(result, dataToString(JsonParserArray_getElement(data, i), ((JsonParserArray *)data)->type, infos, indentation + 1), true, true);
 			if (!result)
 				return (NULL);
 			buffer = result;
@@ -93,13 +93,13 @@ char	*dataToString(void *data, ParserTypes type, ParserInfos *infos, int indenta
 			return (NULL);
 		free(buffer);
 		break;
-	case ParserObjType:
+	case JsonParserObjType:
 		result = malloc(2);
 		if (!result)
 			return (NULL);
 		result[0] = infos->objOpen;
 		result[1] = 0;
-		for (ParserObj *list = data; list; list = list->next) {
+		for (JsonParserObj *list = data; list; list = list->next) {
 			buffer = result;
 			index = transformString(list->index, strlen(list->index), infos);
 			if (!infos->compact)
@@ -125,13 +125,13 @@ char	*dataToString(void *data, ParserTypes type, ParserInfos *infos, int indenta
 			return (NULL);
 		free(buffer);
 		break;
-	case ParserListType:
+	case JsonParserListType:
 		result = malloc(2);
 		if (!result)
 			return (NULL);
 		result[0] = infos->arrOpen;
 		result[1] = 0;
-		for (ParserList *list = data; list; list = list->next) {
+		for (JsonParserList *list = data; list; list = list->next) {
 			if (!infos->compact) {
 				buffer = result;
 				result = concatf("%s\n%s\t", result, indent);
@@ -154,10 +154,10 @@ char	*dataToString(void *data, ParserTypes type, ParserInfos *infos, int indenta
 			return (NULL);
 		free(buffer);
 		break;
-	case ParserIntType:
-		result = concatf("%i", *(ParserInt *)data);
+	case JsonParserIntType:
+		result = concatf("%i", *(JsonParserInt *)data);
 		break;
-	case ParserNullType:
+	case JsonParserNullType:
 		result = strdup("null");
 		break;
 	}
@@ -165,20 +165,20 @@ char	*dataToString(void *data, ParserTypes type, ParserInfos *infos, int indenta
 	return (result);
 }
 
-char	*Parser_createString(void *data, ParserTypes type, ParserInfos *infos)
+char	*JsonParser_createString(void *data, JsonParserTypes type, JsonParserInfos *infos)
 {
 	if (infos && !strlen(infos->strChar))
 		return (NULL);
 	return (dataToString(data, type, infos ? infos : JSON_COMPACT, 0));
 }
 
-bool	Parser_createFile(char *path, void *data, ParserTypes type, ParserInfos *infos)
+bool	JsonParser_createFile(char *path, void *data, JsonParserTypes type, JsonParserInfos *infos)
 {
 	int	fd;
 	bool	success = true;
 	char	*buffer = NULL;
 
-	buffer = Parser_createString(data, type, infos);
+	buffer = JsonParser_createString(data, type, infos);
 	remove(path);
 	fd = open(path, O_WRONLY | O_CREAT, 0664);
 	if (fd < 0)

@@ -1,12 +1,12 @@
-#include "configParser.h"
 #include <malloc.h>
+#include "JsonParser.h"
 
-char	*ParserString_toCharStar(ParserString *value)
+char	*JsonParserString_toCharStar(JsonParserString *value)
 {
 	return (value->content);
 }
 
-void	ParserString_destroy(ParserString *value)
+void	JsonParserString_destroy(JsonParserString *value)
 {
 	free(value->content);
 	free(value);

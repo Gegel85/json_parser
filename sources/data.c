@@ -1,110 +1,96 @@
-#include "configParser.h"
+#include <stddef.h>
 #include <malloc.h>
+#include "JsonParser.h"
 
-void	*copyData(void *data, ParserTypes type)
+void	*JsonParser_copyData(void *data, JsonParserTypes type)
 {
-	int	size = getSizeOf(type);
-	void	*new = malloc(size);
+	int	size = JsonParser_getSizeOf(type);
+	void	*new = size ? malloc(size) : NULL;
 
 	if (new) {
 		for (int i = 0; i < size; i++)
 			((char *)new)[i] = ((char *)data)[i];
-		if (type == ParserObjType && ((ParserObj *)data)->next)
-			((ParserObj *)data)->next->prev = new;
-		else if (type == ParserListType && ((ParserList *)data)->next)
-			((ParserList *)data)->next->prev = new;
+		if (type == JsonParserObjType && ((JsonParserObj *)data)->next)
+			((JsonParserObj *)data)->next->prev = new;
+		else if (type == JsonParserListType && ((JsonParserList *)data)->next)
+			((JsonParserList *)data)->next->prev = new;
 	}
 	return (new);
 }
 
-char	*typeToString(ParserTypes type)
+char	*JsonParser_typeToString(JsonParserTypes type)
 {
-	char	*name = "Unknown";
-
 	switch(type) {
-	case ParserBooleanType:
-		name = "boolean";
-		break;
-	case ParserStringType:
-		name = "string";
-		break;
-	case ParserFloatType:
-		name = "float";
-		break;
-	case ParserArrayType:
-		name = "array";
-		break;
-	case ParserObjType:
-		name = "object";
-		break;
-	case ParserListType:
-		name = "list";
-		break;
-	case ParserIntType:
-		name = "int";
-		break;
-	case ParserNullType:
-		name = "null";
-		break;
+	case JsonParserBooleanType:
+		return "boolean";
+	case JsonParserStringType:
+		return "string";
+	case JsonParserFloatType:
+		return "float";
+	case JsonParserArrayType:
+		return "array";
+	case JsonParserObjType:
+		return "object";
+	case JsonParserListType:
+		return "list";
+	case JsonParserIntType:
+		return "int";
+	case JsonParserNullType:
+		return "null";
 	}
-	return (name);
+	return "Unknown";
 }
 
-int	getSizeOf(ParserTypes type)
+int	JsonParser_getSizeOf(JsonParserTypes type)
 {
-	int	size = 0;
-
 	switch(type) {
-	case ParserBooleanType:
-		size = sizeof(ParserBoolean);
-		break;
-	case ParserStringType:
-		size = sizeof(ParserString);
-		break;
-	case ParserFloatType:
-		size = sizeof(ParserFloat);
-		break;
-	case ParserArrayType:
-		size = sizeof(ParserArray);
-		break;
-	case ParserObjType:
-		size = sizeof(ParserObj);
-		break;
-	case ParserListType:
-		size = sizeof(ParserList);
-		break;
-	case ParserIntType:
-		size = sizeof(ParserInt);
-		break;
+	case JsonParserBooleanType:
+		return sizeof(JsonParserBoolean);
+	case JsonParserStringType:
+		return sizeof(JsonParserString);
+	case JsonParserFloatType:
+		return sizeof(JsonParserFloat);
+	case JsonParserArrayType:
+		return sizeof(JsonParserArray);
+	case JsonParserObjType:
+		return sizeof(JsonParserObj);
+	case JsonParserListType:
+		return sizeof(JsonParserList);
+	case JsonParserIntType:
+		return sizeof(JsonParserInt);
+	case JsonParserNullType:
+		return 0;
 	}
-	return (size);
+	return 0;
 }
 
-void	Parser_destroyData(void *data, ParserTypes type)
+void	JsonParser_destroyData(void *data, JsonParserTypes type)
 {
 	if (!data)
 		return;
 	switch(type) {
-	case ParserBooleanType:
-		ParserBoolean_destroy(data);
+	case JsonParserBooleanType:
+		JsonParserBoolean_destroy(data);
 		break;
-	case ParserStringType:
-		ParserString_destroy(data);
+	case JsonParserStringType:
+		JsonParserString_destroy(data);
 		break;
-	case ParserFloatType:
-		ParserFloat_destroy(data);
+	case JsonParserFloatType:
+		JsonParserFloat_destroy(data);
 		break;
-	case ParserArrayType:
-		ParserArray_destroy(data);
+	case JsonParserArrayType:
+		JsonParserArray_destroy(data);
 		break;
-	case ParserObjType:
-		ParserObj_destroy(data);
+	case JsonParserObjType:
+		JsonParserObj_destroy(data);
 		break;
-	case ParserListType:
-		ParserList_destroy(data);
+	case JsonParserListType:
+		JsonParserList_destroy(data);
 		break;
-	case ParserIntType:
-		ParserInt_destroy(data);
+	case JsonParserIntType:
+		JsonParserInt_destroy(data);
+		break;
+	case JsonParserNullType:
 		break;
 	}
 }

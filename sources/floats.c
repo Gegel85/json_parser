@@ -1,12 +1,12 @@
-#include "configParser.h"
 #include <malloc.h>
+#include "JsonParser.h"
 
-float	ParserFloat_toFloat(ParserFloat *value)
+float	JsonParserFloat_toFloat(JsonParserFloat *value)
 {
 	return (*value);
 }
 
-void	ParserFloat_destroy(ParserFloat *value)
+void	JsonParserFloat_destroy(JsonParserFloat *value)
 {
 	free(value);
 }

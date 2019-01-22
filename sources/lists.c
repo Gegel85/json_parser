@@ -1,47 +1,47 @@
-#include "configParser.h"
 #include <malloc.h>
 #include <string.h>
+#include "JsonParser.h"
 
-ParserList	*ParserList_getElement(ParserList *list, int index)
+JsonParserList	*JsonParserList_getElement(JsonParserList *list, int index)
 {
 	int		len = 0;
 
-	for (ParserList *buf = list; buf; buf = buf->next, len++);
+	for (JsonParserList *buf = list; buf; buf = buf->next, len++);
 	index = (index % len + len) % len;
 	for (int i = 0; i++ < index; list = list->next);
 	return (list);
 }
 
-ParserArray	ParserList_toArray(ParserList *list)
+JsonParserArray	JsonParserList_toArray(JsonParserList *list)
 {
-	ParserArray	result = {NULL, 0, ParserBooleanType, list};
+	JsonParserArray	result = {NULL, 0, JsonParserBooleanType, list};
 	int		len = 0;
 	int		index = 0;
 
 	result.type = list->type;
 	if (!list->data)
 		return (result);
-	for (ParserList *l = list; l; l = l->next, len++)
+	for (JsonParserList *l = list; l; l = l->next, len++)
 		if (result.type != l->type)
-			return ((ParserArray){NULL, -1, ParserBooleanType, NULL});
-	result.content = malloc(len * getSizeOf(result.type));
+			return ((JsonParserArray){NULL, -1, JsonParserBooleanType, NULL});
+	result.content = malloc(len * JsonParser_getSizeOf(result.type));
 	if (!result.content)
-		return ((ParserArray){NULL, -1, ParserBooleanType, NULL});
+		return ((JsonParserArray){NULL, -1, JsonParserBooleanType, NULL});
 	result.length = len;
-	memset(result.content, 0, len * getSizeOf(result.type));
-	for (ParserList *l = list; l; l = l->next, index += getSizeOf(result.type))
-		for (int i = 0; i < getSizeOf(result.type) && l->data; i++)
+	memset(result.content, 0, len * JsonParser_getSizeOf(result.type));
+	for (JsonParserList *l = list; l; l = l->next, index += JsonParser_getSizeOf(result.type))
+		for (int i = 0; i < JsonParser_getSizeOf(result.type) && l->data; i++)
 			((char *)result.content)[i + index] = ((char *)l->data)[i];
 	return (result);
 }
 
-bool	ParserList_addElement(ParserList *list, void *data, ParserTypes type, int index)
+bool	JsonParserList_addElement(JsonParserList *list, void *data, JsonParserTypes type, int index)
 {
-	ParserList	*buffer = NULL;
-	ParserString	buff;
+	JsonParserList	*buffer = NULL;
+	JsonParserString	buff;
 	int		len = 0;
 
-	for (ParserList *buf = list; buf; buf = buf->next, len++);
+	for (JsonParserList *buf = list; buf; buf = buf->next, len++);
 	index = (index % len + len) % len;
 	for (int i = 0; i++ < index; list = list->next);
 	if (list->data) {
@@ -53,22 +53,22 @@ bool	ParserList_addElement(ParserList *list, void *data, ParserTypes type, int i
 		list = list->next;
 		list->next = buffer;
 	}
-	if (type == ParserStringType) {
+	if (type == JsonParserStringType) {
 		buff.length = strlen(data);
 		buff.content = strdup(data);
-		list->data = copyData(&buff, type);
+		list->data = JsonParser_copyData(&buff, type);
 	} else
-		list->data = copyData(data, type);
+		list->data = JsonParser_copyData(data, type);
 	list->type = type;
 	return (true);
 }
 
-void	destroyListEntry(ParserList *list)
+void	destroyListEntry(JsonParserList *list)
 {
-	ParserList	buff;
+	JsonParserList	buff;
 
 	memset(&buff, 0, sizeof(buff));
-	Parser_destroyData(list->data, list->type);
+	JsonParser_destroyData(list->data, list->type);
 	if (!list->prev) {
 		if (list->next) {
 			buff = *list->next;
@@ -84,7 +84,7 @@ void	destroyListEntry(ParserList *list)
 	free(list);
 }
 
-void	ParserList_delElement(ParserList *list, int index)
+void	JsonParserList_delElement(JsonParserList *list, int index)
 {
 	for (int i = 0; list; list = list->next)
 		if (i++ == index) {
@@ -93,15 +93,15 @@ void	ParserList_delElement(ParserList *list, int index)
 		}
 }
 
-void	ParserList_destroy(ParserList *list)
+void	JsonParserList_destroy(JsonParserList *list)
 {
 	for (; list->next; list = list->next) {
 		if (list->prev)
 			free(list->prev);
-		Parser_destroyData(list->data, list->type);
+		JsonParser_destroyData(list->data, list->type);
 	}
 	if (list->prev)
 		free(list->prev);
-	Parser_destroyData(list->data, list->type);
+	JsonParser_destroyData(list->data, list->type);
 	free(list);
 }

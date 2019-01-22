@@ -1,4 +1,4 @@
-NAME =	libjson_arser.a
+NAME =	libjson_parser.a
 
 FILE =	parser.c	\
 	floats.c	\
@@ -11,6 +11,19 @@ FILE =	parser.c	\
 	lists.c		\
 	dumper.c	\
 	debug.c		\
+	concat.c	\
+        concatf.c	\
+        float_to_str.c	\
+        get_nbrlen.c	\
+        int_to_str.c	\
+        uint_to_str.c	\
+        sub_strings.c	\
+        str.c		\
+        my_showstr.c	\
+        my_putnbr_base.c\
+        my_putstar.c	\
+        my_putbase.c	\
+        power.c		\
 
 SRC =	$(FILE:%.c=sources/%.o)
 

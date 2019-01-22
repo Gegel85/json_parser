@@ -1,15 +1,10 @@
-/*
-** EPITECH PROJECT, 2017
-** my.h
-** File description:
-** header for my lib
-*/
-
-#ifndef __MY_H_
-#define __MY_H_ 1
+#ifndef __CONCATF_H_
+#define __CONCATF_H_
 
 #include <stdbool.h>
 #include <stdarg.h>
+
+#define ABS(x) (x < 0 ? -x : x)
 
 char	*concatf(char *str, ...);
 int	get_nbrlen(int nbr);
@@ -29,7 +24,7 @@ char	*my_puthexa(int *nbr);
 char	*my_puthexa_cap(int *nbr);
 char	*my_putoctal(int *nbr);
 char	*my_putbinary(int *nbr);
-int	my_compute_power_rec_long(int, int);
+int	power(int, int);
 char	*my_putnbrbase(unsigned int, char const *);
 char	*float_to_str(double nbr, int decimals);
 
