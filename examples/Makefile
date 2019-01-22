@@ -36,7 +36,7 @@ clean:
 	$(RM) $(OBJ)
 
 fclean:	clean
-	$(RM) $(NAME)
+	$(RM) $(NAMES) $(NAMES:%=%.exe)
 
 re:	fclean all
 
