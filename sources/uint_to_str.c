@@ -17,10 +17,10 @@ char    *uint_to_str(unsigned int nb)
 	current_digit = get_nbrlen(nb);
 	digit_pos = current_digit - 1;
 	while (digit_pos >= 0) {
-		current_digit = number_left / pow(10, digit_pos);
+		current_digit = number_left / power(10, digit_pos);
 		str[pos] = current_digit + 48;
 		pos++;
-		number_left -= current_digit * pow(10, digit_pos);
+		number_left -= current_digit * power(10, digit_pos);
 		digit_pos--;
 	}
 	str[pos] = 0;

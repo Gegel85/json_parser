@@ -99,7 +99,7 @@ char	*dataToString(void *data, JsonParserTypes type, JsonParserInfos *infos, int
 			return (NULL);
 		result[0] = infos->objOpen;
 		result[1] = 0;
-		for (JsonParserObj *list = data; list; list = list->next) {
+		for (JsonParserObj *list = data; list && (list->data || list->type == JsonParserNullType); list = list->next) {
 			buffer = result;
 			index = transformString(list->index, strlen(list->index), infos);
 			if (!infos->compact)
@@ -120,7 +120,10 @@ char	*dataToString(void *data, JsonParserTypes type, JsonParserInfos *infos, int
 			free(buffer);
 		}
 		buffer = result;
-		result = concatf("%s%s%s%c", result, infos->compact ? "" : "\n", infos->compact ? "" : indent, infos->objClose);
+		if (((JsonParserObj *)data)->data || ((JsonParserObj *)data)->type == JsonParserNullType)
+			result = concatf("%s%s%s%c", result, infos->compact ? "" : "\n", infos->compact ? "" : indent, infos->objClose);
+		else
+			result = concatf("%s%c", result, infos->objClose);
 		if (!result)
 			return (NULL);
 		free(buffer);
@@ -131,7 +134,7 @@ char	*dataToString(void *data, JsonParserTypes type, JsonParserInfos *infos, int
 			return (NULL);
 		result[0] = infos->arrOpen;
 		result[1] = 0;
-		for (JsonParserList *list = data; list; list = list->next) {
+		for (JsonParserList *list = data; list && (list->data || list->type == JsonParserNullType); list = list->next) {
 			if (!infos->compact) {
 				buffer = result;
 				result = concatf("%s\n%s\t", result, indent);
@@ -149,7 +152,10 @@ char	*dataToString(void *data, JsonParserTypes type, JsonParserInfos *infos, int
 			free(buffer);
 		}
 		buffer = result;
-		result = concatf("%s%s%s%c", result, infos->compact ? "" : "\n", infos->compact ? "" : indent, infos->arrClose);
+		if (((JsonParserList *)data)->data || ((JsonParserList *)data)->type == JsonParserNullType)
+			result = concatf("%s%s%s%c", result, infos->compact ? "" : "\n", infos->compact ? "" : indent, infos->arrClose);
+		else
+			result = concatf("%s%c", result, infos->arrClose);
 		if (!result)
 			return (NULL);
 		free(buffer);

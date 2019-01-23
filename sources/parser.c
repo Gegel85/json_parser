@@ -52,15 +52,28 @@ char	*verifString(char *str, JsonParserInfos *infos)
 {
 	int	arrLvl = 0;
 	int	objLvl = 0;
+	int	string = -1;
 
 	for (int i = 0; str[i]; i++) {
+		if (str[i] == '\\') {
+			i++;
+			continue;
+                }
+		else if (isInString(str[i], infos->strChar) >= 0 || string >= 0) {
+			if (string == -1)
+				string = isInString(str[i], infos->strChar);
+			else if (isInString(str[i], infos->strChar) == string)
+				string = -1;
+		}
+		if (string != -1)
+		    continue;
 		if (str[i] == infos->objOpen)
 			objLvl++;
-		if (str[i] == infos->arrOpen)
+		else if (str[i] == infos->arrOpen)
 			arrLvl++;
-		if (str[i] == infos->objClose)
+		else if (str[i] == infos->objClose)
 			objLvl--;
-		if (str[i] == infos->arrClose)
+		else if (str[i] == infos->arrClose)
 			arrLvl--;
 		if (arrLvl < 0)
 			return ("Unexpected array closer character");
@@ -217,7 +230,7 @@ JsonParserResult	getValue(char *str, JsonParserInfos *infos)
 		printf("ParserError: Unexpected <EOF>\n");
 		return (ERROR_RESULT("Unexpected <EOF>"));
 	}
-	if (*str == infos->objOpen && isInString(str[1], infos->strChar) >= 0) {
+	if (*str == infos->objOpen && (isInString(str[1], infos->strChar) >= 0 || str[1] == infos->objClose)) {
 		index = 1;
 		result.type = JsonParserObjType;
 		result.data = malloc(sizeof(JsonParserObj));
@@ -271,7 +284,9 @@ JsonParserResult	getValue(char *str, JsonParserInfos *infos)
 			obj->data = buff.data;
 			obj->type = buff.type;
 			for (; str[index] && ((str[index] != infos->objClose && str[index] != infos->separator) || arrlvl > 0 || objlvl > 0 || string >= 0); index++) {
-				if (isInString(str[index], infos->strChar) >= 0 || string >= 0) {
+				if (str[index] == '\\')
+					index++;
+				else if (isInString(str[index], infos->strChar) >= 0 || string >= 0) {
 					if (string == -1)
 						string = isInString(str[index], infos->strChar);
 					else if (isInString(str[index], infos->strChar) == string)
@@ -325,7 +340,9 @@ JsonParserResult	getValue(char *str, JsonParserInfos *infos)
 			list->data = buff.data;
 			list->type = buff.type;
 			for (; str[index] && ((str[index] != infos->arrClose && str[index] != infos->separator) || arrlvl > 0 || objlvl > 0 || string >= 0); index++) {
-				if (isInString(str[index], infos->strChar) >= 0 || string >= 0) {
+				if (str[index] == '\\')
+					index++;
+				else if (isInString(str[index], infos->strChar) >= 0 || string >= 0) {
 					if (string == -1)
 						string = isInString(str[index], infos->strChar);
 					else if (isInString(str[index], infos->strChar) == string)
@@ -394,12 +411,15 @@ JsonParserResult	getValue(char *str, JsonParserInfos *infos)
 		}
 	} else if (isInString(*str, infos->strChar) >= 0) {
 		result.type = JsonParserStringType;
-		for (index = 1; infos->strChar[isInString(str[0], infos->strChar)] != str[index]; index++)
+		for (index = 1; infos->strChar[isInString(str[0], infos->strChar)] != str[index]; index++) {
+			if (str[index] == '\\')
+				index++;
 			if (!str[index]) {
 				str[index > 10 ? 10 : index] = 0;
 				printf("ParserError: Unfinished string after '%s'\n", str);
 				return (ERROR_RESULT("Unfinished string found"));
 			}
+		}
 		result.data = malloc(sizeof(JsonParserString));
 		if (!result.data)
 			return (ERROR_RESULT("Alloc error"));

@@ -7,7 +7,7 @@ JsonParserList	*JsonParserList_getElement(JsonParserList *list, int index)
 {
 	int		len = 0;
 
-	for (JsonParserList *buf = list; buf; buf = buf->next, len++);
+	for (JsonParserList *buf = list; buf && (buf->data || buf->type == JsonParserNullType); buf = buf->next, len++);
 	if (ABS(index) >= len)
 		return NULL;
 	index = (index % len + len) % len;

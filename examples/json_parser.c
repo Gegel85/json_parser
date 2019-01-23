@@ -13,8 +13,8 @@ bool	strIsNbr(char *nbr)
 }
 
 int	displayJsonElement(char *path, char *key)
-{
-	JsonParserResult	result = JsonParser_parseFile(path, NULL);	//Parse the file
+{	//Parse the file
+	JsonParserResult	result = JsonParser_parseFile(path, NULL);
 
 	//Verify if an error occured
 	if (result.error) {

@@ -46,7 +46,7 @@ $(NAME):$(OBJ)
 
 clean:
 	$(RM) $(OBJ)
-	$(MAKE) -C clean
+	$(MAKE) -C examples clean
 
 fclean:	clean
 	$(RM) $(NAME)
