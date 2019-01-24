@@ -14,43 +14,47 @@ bool	strIsNbr(char *nbr)
 
 int	displayJsonElement(char *path, char *key)
 {	//Parse the file
-	JsonParserResult	result = JsonParser_parseFile(path, NULL);
+	JsonParserResult	result = JsonParser_parseFile(path, JSON_TO_ARRAY);
 
 	//Verify if an error occured
 	if (result.error) {
 		printf("%s: %s\n", path, result.error);
+		JsonParser_destroyData(result.data, result.type);
 		return EXIT_FAILURE;
 	}
 
 	//Display the file if no key was given
 	if (!key) {
 		JsonParser_printElement(result.data, result.type, NULL);
+		JsonParser_destroyData(result.data, result.type);
 		return EXIT_SUCCESS;
 	}
 
 	//Verify the content type
 	if (result.type == JsonParserObjType) {
-		JsonParserObj	*object = JsonParserObj_getElement(result.data, key);
+		const JsonParserObj	*object = JsonParserObj_getElement(result.data, key);
 
 		//Verify if this object has the key
 		if (!object) {
 			printf("%s: The key \"%s\" doesn't exist in this file", path, key);
+			JsonParser_destroyData(result.data, result.type);
 			return EXIT_FAILURE;
 		} else
 			JsonParser_printElement(object->data, object->type, NULL);
 	} else if (result.type == JsonParserListType && strIsNbr(key)) {
-		JsonParserList	*list = JsonParserList_getElement(result.data, atoi(key));
+		const JsonParserList	*list = JsonParserList_getElement(result.data, atoi(key));
 
 		if (!list) {
 			printf("%s: The key \"%s\" doesn't exist in this file", path, key);
+			JsonParser_destroyData(result.data, result.type);
 			return EXIT_FAILURE;
 		} else
 			JsonParser_printElement(list->data, list->type, NULL);
-	} else if (result.type == JsonParserListType) {
+	} else if (result.type == JsonParserListType)
 		printf("%s: Only integer keys are valid for arrays", path);
-	} else {
+	else
 		printf("%s: Only array and objects can have a key", path);
-	}
+	JsonParser_destroyData(result.data, result.type);
 	return EXIT_SUCCESS;
 }
 
