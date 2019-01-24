@@ -1,7 +1,7 @@
 #include <malloc.h>
 #include "JsonParser.h"
 
-int	JsonParserInt_toInt(JsonParserInt *value)
+int	JsonParserInt_toInt(const JsonParserInt *value)
 {
 	return (*value);
 }

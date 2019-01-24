@@ -458,12 +458,12 @@ JsonParserResult	getValue(char *str, JsonParserInfos *infos)
 	return (result);
 }
 
-JsonParserResult	JsonParser_parseString(char *string, JsonParserInfos *infos)
+JsonParserResult	JsonParser_parseString(const char *str, JsonParserInfos *infos)
 {
 	JsonParserResult	result;
+	char			*string = strdup(str);
 
 	memset(&result, 0, sizeof(result));
-	string = strdup(string);
 	if (!infos)
 		infos = JSON_COMPACT;
 	if (!string)
@@ -483,7 +483,7 @@ JsonParserResult	JsonParser_parseString(char *string, JsonParserInfos *infos)
 	return (result);
 }
 
-JsonParserResult	JsonParser_parseFile(char *path, JsonParserInfos *infos)
+JsonParserResult	JsonParser_parseFile(const char *path, JsonParserInfos *infos)
 {
 	int		fd = open(path, O_RDONLY);
 	struct stat	st;

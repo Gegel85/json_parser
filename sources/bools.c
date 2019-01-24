@@ -1,7 +1,7 @@
 #include <malloc.h>
 #include "JsonParser.h"
 
-bool	JsonParserBoolean_toBool(JsonParserBoolean *value)
+bool	JsonParserBoolean_toBool(const JsonParserBoolean *value)
 {
 	return (*value);
 }

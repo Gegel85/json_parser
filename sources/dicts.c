@@ -2,7 +2,7 @@
 #include <malloc.h>
 #include "JsonParser.h"
 
-JsonParserObj	*JsonParserObj_getElement(JsonParserObj *list, char *index)
+const JsonParserObj	*JsonParserObj_getElement(const JsonParserObj *list, char *index)
 {
 	for (; list; list = list->next)
 		if (strcmp(list->index, index) == 0)

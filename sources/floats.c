@@ -1,7 +1,7 @@
 #include <malloc.h>
 #include "JsonParser.h"
 
-float	JsonParserFloat_toFloat(JsonParserFloat *value)
+float	JsonParserFloat_toFloat(const JsonParserFloat *value)
 {
 	return (*value);
 }

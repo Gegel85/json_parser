@@ -93,7 +93,7 @@ typedef struct {
 //So a call to  JsonParser_parseFile(path, NULL) is like    //
 //a call to     JsonParser_parseFile(path, JSON_COMPACT)    //
 //////////////////////////////////////////////////////////////
-JsonParserResult	JsonParser_parseFile(char *path, JsonParserInfos *infos);
+JsonParserResult	JsonParser_parseFile(const char *path, JsonParserInfos *infos);
 
 //////////////////////////////////////////////////////////////
 //           Parse a NULL terminated string                 //
@@ -103,7 +103,7 @@ JsonParserResult	JsonParser_parseFile(char *path, JsonParserInfos *infos);
 //So a call to  JsonParser_parseString(path, NULL) is like  //
 //a call to     JsonParser_parseString(path, JSON_COMPACT)  //
 //////////////////////////////////////////////////////////////
-JsonParserResult	JsonParser_parseString(char *string, JsonParserInfos *infos);
+JsonParserResult	JsonParser_parseString(const char *string, JsonParserInfos *infos);
 
 //////////////////////////////////////////////////////////////
 //            Dumps the structure to a file                 //
@@ -113,7 +113,7 @@ JsonParserResult	JsonParser_parseString(char *string, JsonParserInfos *infos);
 //So a call to  JsonParser_parseFile(path, NULL) is like    //
 //a call to     JsonParser_parseFile(path, JSON_COMPACT)    //
 //////////////////////////////////////////////////////////////
-bool	JsonParser_createFile(char *path, void *data, JsonParserTypes type, JsonParserInfos *infos);
+bool	JsonParser_createFile(const char *path, const void *data, JsonParserTypes type, JsonParserInfos *infos);
 
 //////////////////////////////////////////////////////////////
 //           Create a NULL terminated string                //
@@ -124,7 +124,7 @@ bool	JsonParser_createFile(char *path, void *data, JsonParserTypes type, JsonPar
 //a call to     JsonParser_createString(path, JSON_COMPACT) //
 //         If an error occurred, returns NULL               //
 //////////////////////////////////////////////////////////////
-char	*JsonParser_createString(void *data, JsonParserTypes type, JsonParserInfos *infos);
+char	*JsonParser_createString(const void *data, JsonParserTypes type, JsonParserInfos *infos);
 
 
 
@@ -155,7 +155,7 @@ char	*JsonParser_typeToString(JsonParserTypes type);
 //////////////////////////////////////////////////////////////
 //                     Displays a data                      //
 //////////////////////////////////////////////////////////////
-void	JsonParser_printElement(void *data, JsonParserTypes type, JsonParserInfos *infos);
+void	JsonParser_printElement(const void *data, JsonParserTypes type, JsonParserInfos *infos);
 
 
 
@@ -170,7 +170,7 @@ void	JsonParser_printElement(void *data, JsonParserTypes type, JsonParserInfos *
 //   Returns a pointer to the element at the index in the   //
 //     array. If not in the array range, returns NULL.      //
 //////////////////////////////////////////////////////////////
-void	*JsonParserArray_getElement(JsonParserArray *array, int index);
+void	*JsonParserArray_getElement(const JsonParserArray *array, int index);
 
 //////////////////////////////////////////////////////////////
 //               Destroys the given array                   //
@@ -194,7 +194,7 @@ JsonParserArray	JsonParserList_toArray(JsonParserList *list);
 //    Returns a pointer to the link at the index or NULL    //
 //    if not found                                          //
 //////////////////////////////////////////////////////////////
-JsonParserList	*JsonParserList_getElement(JsonParserList *list, int index);
+const JsonParserList	*JsonParserList_getElement(const JsonParserList *list, int index);
 
 //////////////////////////////////////////////////////////////
 //   Add the given list to the index in the list. Returns   //
@@ -222,7 +222,7 @@ void	JsonParserList_destroy(JsonParserList *list);
 //    Returns a pointer to the link at the index or NULL    //
 //    if not found                                          //
 //////////////////////////////////////////////////////////////
-JsonParserObj	*JsonParserObj_getElement(JsonParserObj *list, char *index);
+const JsonParserObj	*JsonParserObj_getElement(const JsonParserObj *list, char *index);
 
 //////////////////////////////////////////////////////////////
 //   Add the given list to the index in the list. Returns   //
@@ -249,7 +249,7 @@ void	JsonParserObj_destroy(JsonParserObj *list);
 //////////////////////////////////////////////////////////////
 //   Transform a JsonParserFloat type to a classic float    //
 //////////////////////////////////////////////////////////////
-float	JsonParserFloat_toFloat(JsonParserFloat *value);
+float	JsonParserFloat_toFloat(const JsonParserFloat *value);
 
 //////////////////////////////////////////////////////////////
 //               Destroys the given float                   //
@@ -265,7 +265,7 @@ void	JsonParserFloat_destroy(JsonParserFloat *value);
 //////////////////////////////////////////////////////////////
 //  Transform a JsonParserString type to a classic char *   //
 //////////////////////////////////////////////////////////////
-char	*JsonParserString_toCharStar(JsonParserString *value);
+char	*JsonParserString_toCharStar(const JsonParserString *value);
 
 //////////////////////////////////////////////////////////////
 //                Destroys the given int                    //
@@ -281,7 +281,7 @@ void	JsonParserString_destroy(JsonParserString *value);
 //////////////////////////////////////////////////////////////
 //     Transform a JsonParserInt type to a classic int      //
 //////////////////////////////////////////////////////////////
-int	JsonParserInt_toInt(JsonParserInt *value);
+int	JsonParserInt_toInt(const JsonParserInt *value);
 
 //////////////////////////////////////////////////////////////
 //                Destroys the given int                    //
@@ -297,7 +297,7 @@ void	JsonParserInt_destroy(JsonParserInt *value);
 //////////////////////////////////////////////////////////////
 //   Transform a JsonParserBoolean type to a classic bool   //
 //////////////////////////////////////////////////////////////
-bool	JsonParserBoolean_toBool(JsonParserBoolean *value);
+bool	JsonParserBoolean_toBool(const JsonParserBoolean *value);
 
 //////////////////////////////////////////////////////////////
 //               Destroys the given float                   //

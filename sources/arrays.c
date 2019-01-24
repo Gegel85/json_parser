@@ -2,7 +2,7 @@
 #include <stddef.h>
 #include "JsonParser.h"
 
-void	*JsonParserArray_getElement(JsonParserArray *array, int index)
+void	*JsonParserArray_getElement(const JsonParserArray *array, int index)
 {
 	int	step = 0;
 

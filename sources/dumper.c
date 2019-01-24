@@ -43,7 +43,7 @@ char	*transformString(char *str, int length, JsonParserInfos *infos)
 	return (result);
 }
 
-char	*dataToString(void *data, JsonParserTypes type, JsonParserInfos *infos, int indentation)
+char	*dataToString(const void *data, JsonParserTypes type, JsonParserInfos *infos, int indentation)
 {
 	char	*indent = strdup("");
 	char	*index = NULL;
@@ -88,7 +88,10 @@ char	*dataToString(void *data, JsonParserTypes type, JsonParserInfos *infos, int
 			free(buffer);
 		}
 		buffer = result;
-		result = concatf("%s%s%s%c", result, infos->compact ? "" : "\n", infos->compact ? "" : indent, infos->arrClose);
+		if (((JsonParserArray *)data)->length > 0)
+			result = concatf("%s%s%s%c", result, infos->compact ? "" : "\n", infos->compact ? "" : indent, infos->arrClose);
+		else
+			result = concatf("%s%c", result, infos->arrClose);
 		if (!result)
 			return (NULL);
 		free(buffer);
@@ -99,7 +102,7 @@ char	*dataToString(void *data, JsonParserTypes type, JsonParserInfos *infos, int
 			return (NULL);
 		result[0] = infos->objOpen;
 		result[1] = 0;
-		for (JsonParserObj *list = data; list && (list->data || list->type == JsonParserNullType); list = list->next) {
+		for (const JsonParserObj *list = data; list && (list->data || list->type == JsonParserNullType); list = list->next) {
 			buffer = result;
 			index = transformString(list->index, strlen(list->index), infos);
 			if (!infos->compact)
@@ -134,7 +137,7 @@ char	*dataToString(void *data, JsonParserTypes type, JsonParserInfos *infos, int
 			return (NULL);
 		result[0] = infos->arrOpen;
 		result[1] = 0;
-		for (JsonParserList *list = data; list && (list->data || list->type == JsonParserNullType); list = list->next) {
+		for (const JsonParserList *list = data; list && (list->data || list->type == JsonParserNullType); list = list->next) {
 			if (!infos->compact) {
 				buffer = result;
 				result = concatf("%s\n%s\t", result, indent);
@@ -171,14 +174,14 @@ char	*dataToString(void *data, JsonParserTypes type, JsonParserInfos *infos, int
 	return (result);
 }
 
-char	*JsonParser_createString(void *data, JsonParserTypes type, JsonParserInfos *infos)
+char	*JsonParser_createString(const void *data, JsonParserTypes type, JsonParserInfos *infos)
 {
 	if (infos && !strlen(infos->strChar))
 		return (NULL);
 	return (dataToString(data, type, infos ? infos : JSON_COMPACT, 0));
 }
 
-bool	JsonParser_createFile(char *path, void *data, JsonParserTypes type, JsonParserInfos *infos)
+bool	JsonParser_createFile(const char *path, const void *data, JsonParserTypes type, JsonParserInfos *infos)
 {
 	int	fd;
 	bool	success = true;

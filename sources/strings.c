@@ -1,7 +1,7 @@
 #include <malloc.h>
 #include "JsonParser.h"
 
-char	*JsonParserString_toCharStar(JsonParserString *value)
+char	*JsonParserString_toCharStar(const JsonParserString *value)
 {
 	return (value->content);
 }

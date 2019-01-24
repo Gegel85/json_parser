@@ -3,11 +3,11 @@
 #include "concatf.h"
 #include "JsonParser.h"
 
-JsonParserList	*JsonParserList_getElement(JsonParserList *list, int index)
+const JsonParserList	*JsonParserList_getElement(const JsonParserList *list, int index)
 {
 	int		len = 0;
 
-	for (JsonParserList *buf = list; buf && (buf->data || buf->type == JsonParserNullType); buf = buf->next, len++);
+	for (const JsonParserList *buf = list; buf && (buf->data || buf->type == JsonParserNullType); buf = buf->next, len++);
 	if (ABS(index) >= len)
 		return NULL;
 	index = (index % len + len) % len;
@@ -98,6 +98,10 @@ void	JsonParserList_delElement(JsonParserList *list, int index)
 
 void	JsonParserList_destroy(JsonParserList *list)
 {
+	if (!list->data && list->type != JsonParserNullType) {
+		free(list);
+		return;
+	}
 	for (; list->next; list = list->next) {
 		if (list->prev)
 			free(list->prev);
