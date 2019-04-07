@@ -39,6 +39,8 @@ CFLAGS=	$(INC)	\
 CC =	gcc
 
 all:	$(NAME)
+	$(MAKE) -C "cpp binding"
+	cp "cpp binding/libjson_parser_cpp.a" .
 	$(MAKE) -C examples
 
 $(NAME):$(OBJ)
@@ -46,11 +48,14 @@ $(NAME):$(OBJ)
 
 clean:
 	$(RM) $(OBJ)
+	$(MAKE) -C "cpp binding" clean
 	$(MAKE) -C examples clean
 
 fclean:	clean
 	$(RM) $(NAME)
+	$(MAKE) -C "cpp binding" fclean
 	$(MAKE) -C examples fclean
+	$(RM) libjson_parser_cpp.a
 
 re:	fclean all
 
