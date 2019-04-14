@@ -48,8 +48,10 @@ CFLAGS=	$(INC)	\
 
 CC =	gcc
 
+RULE = all
+
 all:	$(NAME)
-	$(MAKE) -C "cpp binding"
+	$(MAKE) -C "cpp binding" $(RULE)
 	$(CP) $(BINDING_PATH) .
 	$(MAKE) -C examples
 
@@ -70,4 +72,9 @@ fclean:	clean
 re:	fclean all
 
 dbg:	CFLAGS += -g -O0
+dbg:	RULE = dbg
 dbg:	re
+
+PIC:	CFLAGS += -fPIC
+PIC:	RULE = PIC
+PIC:	all
