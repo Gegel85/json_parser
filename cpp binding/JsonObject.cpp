@@ -10,7 +10,11 @@ JsonObject::JsonObject(JsonParserObj &elem)
 
 std::unique_ptr<JsonValue> &JsonObject::operator[](const std::string &id)
 {
-	return this->_value.at(id);
+	try {
+		return this->_value.at(id);
+	} catch (std::out_of_range &) {
+		throw std::out_of_range("Cannot find key '" + id + "' in this object");
+	}
 }
 
 std::map<std::string, std::unique_ptr<JsonValue>> &JsonObject::value()
