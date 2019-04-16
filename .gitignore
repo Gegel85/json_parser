@@ -54,3 +54,7 @@ dkms.conf
 .idea
 cmake-build-*
 CMakeLists.txt
+examples/json_creator
+examples/json_nice
+examples/json_parser
+examples/json_parser_cpp
