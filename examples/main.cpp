@@ -15,19 +15,24 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	std::unique_ptr<JsonValue> value = JsonParser::parseFile(argv[1]);
+	try {
+		std::unique_ptr <JsonValue> value = JsonParser::parseFile(argv[1]);
 
-	value->dump();
-	if (!value->is<JsonObject>()) {
-		std::cerr << "An object is expected in the file" << std::endl;
+		value->dump();
+		if (!value->is<JsonObject>()) {
+			std::cerr << "An object is expected in the file" << std::endl;
+			return EXIT_FAILURE;
+		}
+
+		JsonObject &obj = value->to<JsonObject>();
+
+		if (obj[argv[2]])
+			obj[argv[2]]->dump();
+		else
+			std::cout << "The key '" << argv[2] << "' wasn't found" << std::endl;
+	} catch (std::exception &e) {
+		std::cerr << e.what() << std::endl;
 		return EXIT_FAILURE;
 	}
-
-	JsonObject &obj = value->to<JsonObject>();
-
-	if (obj[argv[2]])
-		obj[argv[2]]->dump();
-	else
-		std::cout << "The key '" << argv[2] << "' wasn't found" << std::endl;
 	return EXIT_SUCCESS;
 }

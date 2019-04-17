@@ -18,7 +18,7 @@ int	displayJsonElement(char *path, char *key)
 
 	//Verify if an error occured
 	if (result.error) {
-		printf("%s: %s\n", path, result.error);
+		printf("%s\n", result.error);
 		JsonParser_destroyData(result.data, result.type);
 		return EXIT_FAILURE;
 	}

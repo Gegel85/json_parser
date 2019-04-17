@@ -10,15 +10,15 @@
 #include <unistd.h>
 #include "JsonParser.h"
 
-#define ERROR_RESULT(message)	((JsonParserResult){NULL, 0, message})
+#define ERROR_RESULT(message, format, ...)	(sprintf(message, format, ##__VA_ARGS__), fprintf(stderr, "ParserError: %s\n", message), (JsonParserResult){NULL, 0, message})
 
-void	delChar(char *str, int i)
+static void	delChar(char *str, int i)
 {
 	for (int j = i; str[j]; j++)
 		str[j] = str[j + 1];
 }
 
-bool	startWith(char *str, char *start)
+static bool	startWith(const char *str, const char *start)
 {
 	if (!start)
 		return (false);
@@ -28,7 +28,7 @@ bool	startWith(char *str, char *start)
 	return (true);
 }
 
-int	isInString(char c, char *str)
+static int	isInString(char c, const char *str)
 {
 	for (int i = 0; str[i]; i++)
 		if (str[i] == c)
@@ -36,7 +36,7 @@ int	isInString(char c, char *str)
 	return (-1);
 }
 
-char	getNumberBase(char *str, char *base)
+static char	getNumberBase(char *str, char *base)
 {
 	char	result = 0;
 
@@ -48,7 +48,7 @@ char	getNumberBase(char *str, char *base)
 	return (result);
 }
 
-char	*verifString(char *str, JsonParserInfos *infos)
+static char	*verifString(char *str, JsonParserInfos *infos)
 {
 	int	arrLvl = 0;
 	int	objLvl = 0;
@@ -83,7 +83,7 @@ char	*verifString(char *str, JsonParserInfos *infos)
 	return (NULL);
 }
 
-void	replaceEscapeSequence(char *str, int index)
+static void	replaceEscapeSequence(char *str, int index)
 {
 	switch (str[index]) {
 	case 'a':
@@ -123,7 +123,7 @@ void	replaceEscapeSequence(char *str, int index)
 	}
 }
 
-char	*cleanString(char *str, JsonParserInfos *infos)
+static char	*cleanString(char *str, JsonParserInfos *infos)
 {
 	int	quote = -1;
 	int	i = 0;
@@ -134,7 +134,7 @@ char	*cleanString(char *str, JsonParserInfos *infos)
 				delChar(str, i);
 			while (!startWith(&str[i], infos->multLineCommentEnd)) {
 				if (!str[i]) {
-					printf("ParserError: Unfinished comment\n");
+					fprintf(stderr, "ParserError: Unfinished comment\n");
 					return ("Unfinished comment");
 				}
 				delChar(str, i);
@@ -167,7 +167,7 @@ char	*cleanString(char *str, JsonParserInfos *infos)
 	return (NULL);
 }
 
-bool	isFloat(char *str, JsonParserInfos *infos)
+static bool	isFloat(char *str, JsonParserInfos *infos)
 {
 	int	i = 0;
 
@@ -181,7 +181,7 @@ bool	isFloat(char *str, JsonParserInfos *infos)
 	return (str[i] == infos->separator || str[i] == infos->arrClose || str[i] == infos->objClose);
 }
 
-bool	isNbr(char *str, JsonParserInfos *infos)
+static bool	isNbr(char *str, JsonParserInfos *infos)
 {
 	int	i = 0;
 
@@ -192,7 +192,7 @@ bool	isNbr(char *str, JsonParserInfos *infos)
 	return (str[i] == infos->separator || str[i] == infos->arrClose || str[i] == infos->objClose);
 }
 
-bool	isBool(char *str, JsonParserInfos *infos)
+static bool	isBool(char *str, JsonParserInfos *infos)
 {
 	int	i = 0;
 	bool	found = true;
@@ -213,7 +213,7 @@ bool	isBool(char *str, JsonParserInfos *infos)
 	return (found && (str[i] == infos->separator || str[i] == infos->arrClose || str[i] == infos->objClose));
 }
 
-JsonParserResult	getValue(char *str, JsonParserInfos *infos)
+static JsonParserResult	getValue(char *str, JsonParserInfos *infos)
 {
 	JsonParserResult	result;
 	JsonParserResult	buff;
@@ -224,38 +224,39 @@ JsonParserResult	getValue(char *str, JsonParserInfos *infos)
 	int		arrlvl = 0;
 	int		objlvl = 0;
 	int		string = -1;
+	static char	buffer[1024];
 
+	memset(buffer, 0, sizeof(buffer));
 	memset(&result, 0, sizeof(result));
 	if (!*str) {
 		printf("ParserError: Unexpected <EOF>\n");
-		return (ERROR_RESULT("Unexpected <EOF>"));
+		return (ERROR_RESULT(buffer, "Unexpected <EOF>"));
 	}
 	if (*str == infos->objOpen && (isInString(str[1], infos->strChar) >= 0 || str[1] == infos->objClose)) {
 		index = 1;
 		result.type = JsonParserObjType;
 		result.data = malloc(sizeof(JsonParserObj));
 		if (!result.data)
-			return (ERROR_RESULT("Alloc error"));
+			return (ERROR_RESULT(buffer, "Alloc error"));
 		obj = result.data;
 		memset(obj, 0, sizeof(*obj));
 		while (str[index] != infos->objClose && str[index]) {
 			if (isInString(str[index], infos->strChar) == -1) {
 				JsonParserObj_destroy(result.data);
-				return (ERROR_RESULT("Obj keys must be strings"));
+				return (ERROR_RESULT(buffer, "Obj keys must be strings"));
 			}
 			for (index2 = index + 1; infos->strChar[isInString(str[index], infos->strChar)] != str[index2]; index2++) {
 				if (!str[index2]) {
 					JsonParserObj_destroy(result.data);
 					str[index + (index2 > 10 ? 10 : index2)] = 0;
-					printf("ParserError: Unfinished string after '%s'\n", &str[index]);
-					return (ERROR_RESULT("Unfinished string found"));
+					return (ERROR_RESULT(buffer, "ParserError: Unfinished string after '%s'", &str[index]));
 				}
 			}
 			if (obj->data || obj->type == JsonParserNullType) {
 				obj->next = malloc(sizeof(*obj->next));
 				if (!obj->next) {
 					JsonParserObj_destroy(result.data);
-					return (ERROR_RESULT("Alloc error"));
+					return (ERROR_RESULT(buffer, "Alloc error %lu", (unsigned long)sizeof(*obj->next)));
 				}
 				memset(obj->next, 0, sizeof(*obj->next));
 				obj->next->prev = obj;
@@ -264,16 +265,15 @@ JsonParserResult	getValue(char *str, JsonParserInfos *infos)
 			obj->index = malloc(index2 - index);
 			if (!obj->index) {
 				JsonParserObj_destroy(result.data);
-				return (ERROR_RESULT("Alloc error"));
+				return (ERROR_RESULT(buffer, "Alloc error %lu", (unsigned long)index2 - index));
 			}
 			memset(obj->index, 0, index2 - index - 1);
 			strncpy(obj->index, &str[index + 1], index2 - index - 1);
 			obj->index[index2 - index - 1] = 0;
 			index = index2 + 1;
 			if (str[index] != infos->eqChar) {
-				printf("ParserError: Expected equal character after obj key '%s'\n", obj->index);
 				JsonParserObj_destroy(result.data);
-				return (ERROR_RESULT("Expected equal character after obj key"));
+				return (ERROR_RESULT(buffer, "Expected equal character after obj key '%s'", obj->index));
 			}
 			index++;
 			buff = getValue(&str[index], infos);
@@ -305,20 +305,18 @@ JsonParserResult	getValue(char *str, JsonParserInfos *infos)
 		}
 		if (!str[index]) {
 			JsonParserObj_destroy(result.data);
-			printf("ParserError: Expected '%c' before <EOF>\n", infos->objClose);
-			return (ERROR_RESULT("Unexpected <EOF>"));
+			return (ERROR_RESULT(buffer, "Expected '%c' before <EOF>", infos->objClose));
 		}
 		if (str[index + 1] != infos->separator && str[index + 1] != infos->objClose && str[index + 1] != infos->arrClose && str[index + 1]) {
 			JsonParserObj_destroy(result.data);
-			printf("ParserError: Unexpected '%c' found after an object\n", str[index + 1]);
-			return (ERROR_RESULT("Unexpected character found after an object"));
+			return (ERROR_RESULT(buffer, "Unexpected '%c' found after an object", str[index + 1]));
 		}
 	} else if (*str == infos->arrOpen) {
 		index = 1;
 		result.type = JsonParserListType;
 		result.data = malloc(sizeof(JsonParserList));
 		if (!result.data)
-			return (ERROR_RESULT("Alloc error"));
+			return (ERROR_RESULT(buffer, "Alloc error %lu", (unsigned long)sizeof(JsonParserList)));
 		list = result.data;
 		memset(list, 0, sizeof(*list));
 		while (str[index] != infos->arrClose && str[index]) {
@@ -331,7 +329,7 @@ JsonParserResult	getValue(char *str, JsonParserInfos *infos)
 				list->next = malloc(sizeof(*list->next));
 				if (!list->next) {
 					JsonParserList_destroy(result.data);
-					return (ERROR_RESULT("Alloc error"));
+					return (ERROR_RESULT(buffer, "Alloc error %lu", (unsigned long)sizeof(*list->next)));
 				}
 				memset(list->next, 0, sizeof(*list->next));
 				list->next->prev = list;
@@ -361,13 +359,11 @@ JsonParserResult	getValue(char *str, JsonParserInfos *infos)
 		}
 		if (!str[index]) {
 			JsonParserList_destroy(result.data);
-			printf("ParserError: Expected '%c' before <EOF>\n", infos->arrClose);
-			return (ERROR_RESULT("Unexpected <EOF>"));
+			return (ERROR_RESULT(buffer, "Expected '%c' before <EOF>", infos->arrClose));
 		}
 		if (str[index + 1] != infos->separator && str[index + 1] != infos->objClose && str[index + 1] != infos->arrClose && str[index + 1]) {
 			JsonParserList_destroy(result.data);
-			printf("ParserError: Unexpected '%c' found after an array\n", str[index + 1]);
-			return (ERROR_RESULT("Unexpected character found after an array"));
+			return (ERROR_RESULT(buffer, "Unexpected '%c' found after an array", str[index + 1]));
 		}
 		if (infos->listToArray) {
 			list = result.data;
@@ -384,20 +380,19 @@ JsonParserResult	getValue(char *str, JsonParserInfos *infos)
 		result.type = JsonParserIntType;
 		result.data = malloc(sizeof(JsonParserInt));
 		if (!result.data)
-			return (ERROR_RESULT("Alloc error"));
+			return (ERROR_RESULT(buffer, "Alloc error %lu", (unsigned long)sizeof(JsonParserInt)));
 		*(JsonParserInt *)result.data = atoi(str);
 		for (; str[index] == '-' || str[index] == '+'; index++);
 		for (; isdigit(str[index]); index++);
 		if (str[index] != infos->separator && str[index] != infos->objClose && str[index] != infos->arrClose && str[index]) {
 			JsonParserInt_destroy(result.data);
-			printf("ParserError: Unexpected '%c' found after an integer\n", str[index]);
-			return (ERROR_RESULT("Unexpected character found after an integer"));
+			return (ERROR_RESULT(buffer, "Unexpected '%c' found after an integer", str[index]));
 		}
 	} else if (isFloat(str, infos)) {
 		result.type = JsonParserFloatType;
 		result.data = malloc(sizeof(JsonParserFloat));
 		if (!result.data)
-			return (ERROR_RESULT("Alloc error"));
+			return (ERROR_RESULT(buffer, "Alloc error %lu", (unsigned long)sizeof(JsonParserFloat)));
 		*(JsonParserFloat *)result.data = atof(str);
 		for (; str[index] == '-' || str[index] == '+'; index++);
 		for (; isdigit(str[index]); index++);
@@ -406,8 +401,7 @@ JsonParserResult	getValue(char *str, JsonParserInfos *infos)
 		for (; isdigit(str[index]); index++);
 		if (str[index] != infos->separator && str[index] != infos->objClose && str[index] != infos->arrClose && str[index]) {
 			JsonParserFloat_destroy(result.data);
-			printf("ParserError: Unexpected '%c' found after a float\n", str[index]);
-			return (ERROR_RESULT("Unexpected character found after a float"));
+			return (ERROR_RESULT(buffer, "Unexpected '%c' found after a float", str[index]));
 		}
 	} else if (isInString(*str, infos->strChar) >= 0) {
 		result.type = JsonParserStringType;
@@ -416,17 +410,16 @@ JsonParserResult	getValue(char *str, JsonParserInfos *infos)
 				index++;
 			if (!str[index]) {
 				str[index > 10 ? 10 : index] = 0;
-				printf("ParserError: Unfinished string after '%s'\n", str);
-				return (ERROR_RESULT("Unfinished string found"));
+				return (ERROR_RESULT(buffer, "Unfinished string after '%s'", str));
 			}
 		}
 		result.data = malloc(sizeof(JsonParserString));
 		if (!result.data)
-			return (ERROR_RESULT("Alloc error"));
+			return (ERROR_RESULT(buffer, "Alloc error %lu", (unsigned long)sizeof(JsonParserString)));
 		(*(JsonParserString *)result.data).content = malloc(index);
 		if (!(*(JsonParserString *)result.data).content) {
 			free(result.data);
-			return (ERROR_RESULT("Alloc error"));
+			return (ERROR_RESULT(buffer, "Alloc error %lu", (unsigned long)index));
 		}
 		memset((*(JsonParserString *)result.data).content, 0, index - 1);
 		strncpy((*(JsonParserString *)result.data).content, &str[1], index - 1);
@@ -434,26 +427,24 @@ JsonParserResult	getValue(char *str, JsonParserInfos *infos)
 		(*(JsonParserString *)result.data).length = index - 1;
 		if (str[index + 1] != infos->separator && str[index + 1] != infos->objClose && str[index + 1] != infos->arrClose && str[index + 1]) {
 			JsonParserString_destroy(result.data);
-			printf("ParserError: Unexpected '%c' found after a string\n", str[index + 1]);
-			return (ERROR_RESULT("Unexpected character found after a string"));
+			return (ERROR_RESULT(buffer, "Unexpected '%c' found after a string", str[index + 1]));
 		}
 	} else if (isBool(str, infos)) {
 		result.type = JsonParserBooleanType;
 		result.data = malloc(sizeof(JsonParserBoolean));
 		if (!result.data)
-			return (ERROR_RESULT("Alloc error"));
+			return (ERROR_RESULT(buffer, "Alloc error %lu", (unsigned long)sizeof(JsonParserBoolean)));
 		*(JsonParserBoolean *)result.data = (*str == 't');
 		if (str[index + (*str == 't' ? 4 : 5)] != infos->separator && str[index + (*str == 't' ? 4 : 5)] != infos->objClose && str[index + (*str == 't' ? 4 : 5)] != infos->arrClose && str[index + (*str == 't' ? 4 : 5)]) {
 			JsonParserBoolean_destroy(result.data);
-			printf("ParserError: Unexpected '%c' found after a boolean\n", str[index + (*str == 't' ? 4 : 5)]);
-			return (ERROR_RESULT("Unexpected character found after a boolean"));
+			return (ERROR_RESULT(buffer, "Unexpected '%c' found after a boolean", str[index + (*str == 't' ? 4 : 5)]));
 		}
 	} else if (strncmp(str, "null", 4) == 0) {
 		result.type = JsonParserNullType;
 		result.data = NULL;
 	} else {
 		printf("ParserError: Unexpected character '%c'\n", *str);
-		return (ERROR_RESULT("Unexpected character found"));
+		return (ERROR_RESULT(buffer, "Unexpected character '%c'", *str));
 	}
 	return (result);
 }
@@ -467,7 +458,7 @@ JsonParserResult	JsonParser_parseString(const char *str, JsonParserInfos *infos)
 	if (!infos)
 		infos = JSON_COMPACT;
 	if (!string)
-		return (ERROR_RESULT("Couldn't copy string"));
+		return (JsonParserResult){NULL, 0, "Couldn't copy string"};
 	result.error = cleanString(string, infos);
 	if (result.error) {
 		free(string);
@@ -489,18 +480,15 @@ JsonParserResult	JsonParser_parseFile(const char *path, JsonParserInfos *infos)
 	struct stat	st;
 	char		*buffer = NULL;
 	JsonParserResult	result;
+	static char buff[1024];
 
-	if (fd < 0) {
-		printf("ParserError: %s: %s\n", path, strerror(errno));
-		return (ERROR_RESULT(strerror(errno)));
-	}
-	if (stat(path, &st) == -1) {
-		printf("ParserError: %s: %s\n", path, strerror(errno));
-		return (ERROR_RESULT(strerror(errno)));
-	}
+	if (fd < 0)
+		return (ERROR_RESULT(buff, "%s: %s", path, strerror(errno)));
+	if (stat(path, &st) == -1)
+		return (ERROR_RESULT(buff, "%s: %s", path, strerror(errno)));
 	buffer = malloc(st.st_size + 1);
 	if (!buffer)
-		return (ERROR_RESULT("Alloc error"));
+		return (ERROR_RESULT(buff, "Alloc error %lu", st.st_size + 1));
 	buffer[read(fd, buffer, st.st_size)] = 0;
 	result = JsonParser_parseString(buffer, infos);
 	free(buffer);
