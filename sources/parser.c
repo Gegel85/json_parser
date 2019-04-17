@@ -251,7 +251,7 @@ JsonParserResult	getValue(char *str, JsonParserInfos *infos)
 					return (ERROR_RESULT("Unfinished string found"));
 				}
 			}
-			if (obj->data) {
+			if (obj->data || obj->type == JsonParserNullType) {
 				obj->next = malloc(sizeof(*obj->next));
 				if (!obj->next) {
 					JsonParserObj_destroy(result.data);
@@ -327,7 +327,7 @@ JsonParserResult	getValue(char *str, JsonParserInfos *infos)
 				JsonParserList_destroy(result.data);
 				return (buff);
 			}
-			if (list->data) {
+			if (list->data || list->type == JsonParserNullType) {
 				list->next = malloc(sizeof(*list->next));
 				if (!list->next) {
 					JsonParserList_destroy(result.data);
