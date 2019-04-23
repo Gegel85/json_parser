@@ -37,7 +37,7 @@ char	*transformString(char *str, int length, JsonParserInfos *infos)
 		else if (str[i] == '\0')
 			result = concatf("%s\\x00", result);
 		else
-			result = concatf("%s\\x%s%x", result, str[i] > 15 ? "" : "0", str[i]);
+			result = concatf("%s\\x%s%x", result, (unsigned char)str[i] > 15 ? "" : "0", (unsigned char)str[i]);
 		free(buffer);
 	}
 	return (result);

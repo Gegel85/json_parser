@@ -5,6 +5,8 @@
 ** main.cpp
 */
 
+//todo: << pour afficher des choses
+
 #include <memory>
 #include <JsonParser.hpp>
 
@@ -23,7 +25,7 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	JsonObject &obj = value->to<JsonObject>();
+	auto &obj = value->to<JsonObject>();
 
 	if (obj[argv[2]])
 		obj[argv[2]]->dump();

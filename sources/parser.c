@@ -36,11 +36,11 @@ int	isInString(char c, char *str)
 	return (-1);
 }
 
-char	getNumberBase(char *str, char *base)
+int	getNumberBase(char *str, char *base, int max)
 {
-	char	result = 0;
+	int	result = 0;
 
-	for (int i = 0; i < (strlen(base) == 16 ? 2 : 3) && isInString(*str, base) > -1; i++) {
+	for (int i = 0; i < max && isInString(*str, base) > -1; i++) {
 		result *= strlen(base);
 		result += isInString(*str, base);
 		delChar(str, 0);
@@ -83,8 +83,31 @@ char	*verifString(char *str, JsonParserInfos *infos)
 	return (NULL);
 }
 
+void	insertChar(char *str, char c, int i)
+{
+	for (int j = strlen(str) + 1; j > i; j--)
+		str[j] = str[j - 1];
+	str[i] = c;
+}
+
+void	toUTF8(unsigned short val, char *str)
+{
+	if (val > 2047) {
+		insertChar(str, (val >> 12) + 224, 0);
+		insertChar(str, (val >> 6) % 64 + 128, 0);
+		insertChar(str, val % 64 + 128, 0);
+	} else if (val > 127) {
+		insertChar(str, (val >> 6) + 192, 0);
+		insertChar(str, val % 64 + 128, 0);
+	} else {
+		insertChar(str, val, 0);
+	}
+}
+
 void	replaceEscapeSequence(char *str, int index)
 {
+	short value = 0;
+
 	switch (str[index]) {
 	case 'a':
 		str[index] = '\a';
@@ -110,15 +133,22 @@ void	replaceEscapeSequence(char *str, int index)
 	case 'f':
 		str[index] = '\f';
 		break;
+	case 'u':
+		if (isdigit(str[index + 1]) || (str[index + 1] >= 'a' && str[index + 1] <= 'f')) {
+			value = getNumberBase(&str[index + 1], "0123456789abcdef", 4);
+			delChar(str, index);
+			toUTF8(value, &str[index]);
+		}
+		break;
 	case 'x':
 		if (isdigit(str[index + 1]) || (str[index + 1] >= 'a' && str[index + 1] <= 'f'))
-			str[index] = getNumberBase(&str[index + 1], "0123456789abcdef");
+			str[index] = getNumberBase(&str[index + 1], "0123456789abcdef", 2);
 		break;
 	case '0':
 		if (str[index + 1] < '0' || str[index + 1] > '7')
 			str[index] = '\0';
 		else
-			str[index] = getNumberBase(&str[index + 1], "01234567");
+			str[index] = getNumberBase(&str[index + 1], "01234567", 3);
 		break;
 	}
 }

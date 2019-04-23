@@ -51,5 +51,6 @@ fclean:	clean
 
 re:	fclean all
 
+dbg:	CXXFLAGS += -g -O0
 dbg:	CFLAGS += -g -O0
 dbg:	re
