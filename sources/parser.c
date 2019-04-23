@@ -49,11 +49,11 @@ static void	toUTF8(unsigned short val, char *str)
 {
 	if (val > 2047) {
 		insertChar(str, (val >> 12) + 224, 0);
-		insertChar(str, (val >> 6) % 64 + 128, 0);
-		insertChar(str, val % 64 + 128, 0);
+		insertChar(str, (val >> 6) % 64 + 128, 1);
+		insertChar(str, val % 64 + 128, 2);
 	} else if (val > 127) {
 		insertChar(str, (val >> 6) + 192, 0);
-		insertChar(str, val % 64 + 128, 0);
+		insertChar(str, val % 64 + 128, 1);
 	} else {
 		insertChar(str, val, 0);
 	}
