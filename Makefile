@@ -25,6 +25,16 @@ FILE =	parser.c	\
         my_putbase.c	\
         power.c		\
 
+CP = cp
+BINDING_PATH = "cpp binding/libjson_parser_cpp.a"
+
+ifeq ($(OS),Windows_NT)
+ifeq ($(strip $(filter %sh,$(basename $(realpath $(SHELL))))),)
+CP = copy
+BINDING_PATH = "cpp binding\libjson_parser_cpp.a"
+endif
+endif
+
 SRC =	$(FILE:%.c=sources/%.o)
 
 OBJ =	$(SRC:.c=.o)
@@ -38,9 +48,11 @@ CFLAGS=	$(INC)	\
 
 CC =	gcc
 
+RULE = all
+
 all:	$(NAME)
 	$(MAKE) -C "cpp binding" $(RULE)
-	cp "cpp binding/libjson_parser_cpp.a" .
+	$(CP) $(BINDING_PATH) .
 	$(MAKE) -C examples $(RULE)
 
 $(NAME):$(OBJ)
@@ -62,3 +74,7 @@ re:	fclean all
 dbg:	CFLAGS += -g -O0
 dbg:	RULE = dbg
 dbg:	re
+
+PIC:	CFLAGS += -fPIC
+PIC:	RULE = PIC
+PIC:	all

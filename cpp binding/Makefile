@@ -23,3 +23,11 @@ clean:
 
 fclean:	clean
 		$(RM) $(NAME)
+
+re:	fclean all
+
+dbg:	CXXFLAGS += -O0 -g
+dbg:	re
+
+PIC:	CXXFLAGS += -fPIC
+PIC:	all

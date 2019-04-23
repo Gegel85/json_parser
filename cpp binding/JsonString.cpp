@@ -1,10 +1,3 @@
-/*
-** EPITECH PROJECT, 2019
-** json_parser
-** File description:
-** JsonString.cpp
-*/
-
 #include <iostream>
 #include "../include/JsonString.hpp"
 

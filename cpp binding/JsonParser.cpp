@@ -1,10 +1,3 @@
-/*
-** EPITECH PROJECT, 2019
-** json_parser
-** File description:
-** JsonParser.cpp
-*/
-
 #include "../include/JsonParser.hpp"
 #include "../include/JsonBoolean.hpp"
 #include "../include/JsonObject.hpp"

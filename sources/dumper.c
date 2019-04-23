@@ -5,7 +5,13 @@
 #include <fcntl.h>
 #include "JsonParser.h"
 
-int	isInString(char c, char *str);
+static int	isInString(char c, const char *str)
+{
+	for (int i = 0; str[i]; i++)
+		if (str[i] == c)
+			return (i);
+	return (-1);
+}
 
 char	*transformString(char *str, int length, JsonParserInfos *infos)
 {
@@ -199,3 +205,4 @@ bool	JsonParser_createFile(const char *path, const void *data, JsonParserTypes t
 	close(fd);
 	return (success);
 }
+

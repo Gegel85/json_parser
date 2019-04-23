@@ -1,10 +1,3 @@
-/*
-** EPITECH PROJECT, 2019
-** json_parser
-** File description:
-** JsonArray.cpp
-*/
-
 #include <iostream>
 #include "../include/JsonArray.hpp"
 #include "../include/JsonParser.hpp"
@@ -33,7 +26,7 @@ JsonArray::JsonArray(JsonParserArray &elem)
 
 std::unique_ptr<JsonValue> &JsonArray::operator[](int id)
 {
-	return this->_value[id];
+	return this->_value.at(id);
 }
 
 std::vector<std::unique_ptr<JsonValue>> &JsonArray::value()
